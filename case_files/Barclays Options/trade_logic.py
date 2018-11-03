@@ -1,13 +1,10 @@
-#import py_vollib
+import py_vollib
 import re
 
 UNDERLYING_TICKER = 'TMXFUT'
 
 OPTION_DICT = {}
-IMPLIED_VOL = {}
 VOL_CURVE = {}
-
-
 
 def get_opt_dict(sec_price_dict):
     und_price = sec_price_dict[UNDERLYING_TICKER]
@@ -33,7 +30,20 @@ def get_opt_dict(sec_price_dict):
 
         OPTION_DICT[security] = option_char
 
-def get_vol_curve(OPTION_DICT):
+def get_vol_curve(OPTION_DICT, und_price):
+    base = 5
+    atm_strike = return int(base * round(float(und_price)/base))
+    for security in OPTION_DICT.keys():
+        opt_type = OPTION_DICT[security]["opt_type"]
+        opt_strike = OPTION_DICT[security]["strike"]
+        opt_iv = OPTION_DICT[security]["implied_vol"]
+        #USE OOTM puts and calls to construct vol curve
+        if opt_type == "C" and opt_strike >= atm_strike:
+            VOL_CURVE[str(opt_strike)] = opt_iv
+        elif opt_type == "P" and opt_strike < atm_strike:
+            VOL_CURVE[str(opt_strike)] = opt_iv
+
+
 
 
 
