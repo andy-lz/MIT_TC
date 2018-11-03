@@ -7,7 +7,7 @@ import math
 #Initialize variables: positions, expectations, future customer orders, etc
 C = 1.0/25000
 position_limit = 5000
-max_order_size = 1000
+min_order_size = 1000
 case_length = 450
 last_price = 200.0
 fulfill_ticks = 8
@@ -100,7 +100,6 @@ def update_trader(msg, TradersOrder):
     open_orders = trader_state['open_orders']
 
 
-
 def update_trade(msg, TradersOrder):
     # Update trade information
     print(msg)
@@ -120,6 +119,7 @@ def update_news(msg, TradersOrder):
     news_sz = int(msg['news']['body'])
     news_ABC = msg['news']['source'][0]
     news_px = P0_est
+    cancel_all_orders(TradersOrder)
     news_calc()
     process(TradersOrder)
     #halfway through the case, start trading on dark pool
@@ -127,15 +127,29 @@ def update_news(msg, TradersOrder):
         process_dark()
 
 
+def cancel_all_orders(order):
+    for k, v in open_orders.items():
+        order.addCancel(v['security'],k) #todo fix params
+
 def process_dark():
     pass
+
 
 def process(order):
     # Calculate required edge
     global position_dark, position_lit, news_P0, C
     est_size = news_P0*2/C
     informed_shift(est_size)
-    return
+    pass
+
+
+def informed_shift(sz):
+    global position_dark, position_lit, news_P0, C, P0_conf
+    net_pos = position_lit + position_dark
+
+    # pos_slippage = (position_limit - net_pos)*C
+    # neg_slippage = -1 * (position_limit + net_pos)*C
+    pass
 
 
 def news_calc():
@@ -182,23 +196,14 @@ def get_wap(bid_px_arr, bid_sz_arr, ask_px_arr, ask_sz_arr):
     return ((bid_px_wap * ask_sz_sum) + (ask_px_wap * bid_sz_sum)) / (bid_sz_sum + ask_sz_sum)
 
 
-def informed_shift(sz):
-    global position_dark, position_lit, news_P0, C, P0_conf
-    net_pos = position_lit + position_dark
-
-    # pos_slippage = (position_limit - net_pos)*C
-    # neg_slippage = -1 * (position_limit + net_pos)*C
-    pass
-
-
 def mean_discrete(arr_expect, arr_prob, multiplier):
     return np.average(arr_expect, arr_prob) * multiplier
 
 
 def sd_discrete(arr_expect, arr_prob, multiplier):
-    mu = mean_discrete(arr_expect, arr_prob, multiplier)
+    mu = mean_discrete(arr_expect, arr_prob, 1)
     var = np.average((arr_expect - mu)**2, weights=arr_prob)
-    return math.sqrt(var)*multiplier
+    return math.sqrt(var)*abs(multiplier)
 
 
 t = TradersBot('127.0.0.1', 'trader0', 'trader0')
