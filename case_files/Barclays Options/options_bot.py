@@ -29,9 +29,6 @@ def market_update_method(msg, order):
 	# TODO make this take into account best bids/offers instead
 	SECURITIES[msg['market_state']['ticker']] = msg['market_state']['last_price']
 
-
-
-
 def get_order(curr_pos):
 	global SECURITIES
 	global TIME
@@ -50,23 +47,41 @@ def trader_update_method(msg, order):
 	global SECURITIES
 	print TIME
 	positions = msg['trader_state']['positions']
+	#print positions
 	orders = get_order(positions)
+	print "end get order"
+	print orders
+
 	for security in orders.keys():
 		quant = orders[security]
+		print quant
 		if quant > 0:
+			quant = 1
+			print ("BUY", security, quant, SECURITIES[security])
 			order.addBuy(security, quantity=quant, price=SECURITIES[security])
 		elif quant < 0:
-			order.addSell(security, quantity=-quant, price=SECURITIES[security])
+			quant = 1
+			print ("SELL", security, abs(quant), SECURITIES[security])
+			order.addSell(security, quantity=abs(quant), price=SECURITIES[security])
+	filter_pos = {x:y for x, y in positions.items() if y != 0}
+	print "Positions:", filter_pos
+	#quant = 1
+	#order.addBuy("T104P", quantity=quant, price=SECURITIES["T104P"])
+	#print positions
 
-	'''
+'''
 	for security in positions.keys():
 		if random.random() < 0.5:
-			quant = 10*random.randint(1, 10)
+			quant = 1
+			order.addBuy(security, quantity=quant, price=SECURITIES[security])
 			#order.addBuy(security, quantity=quant,price=SECURITIES[security])
 		else:
-			quant = 10*random.randint(1, 10)
+			quant = 1
+			order.addSell(security, quantity=quant, price=SECURITIES[security])
 			#order.addSell(security, quantity=quant,price=SECURITIES[security])
-	'''
+'''
+
+
 
 ###############################################
 #### You can add more of these if you want ####

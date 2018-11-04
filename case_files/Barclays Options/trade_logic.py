@@ -6,7 +6,7 @@ from py_vollib.black.greeks.analytical import delta, vega
 import re
 
 UNDERLYING_TICKER = 'TMXFUT'
-TRADING_THRESHOLD = 0.035
+TRADING_THRESHOLD = 0.05
 
 OPTION_DICT = {}
 CURR_VOL_CURVE = {}
@@ -65,7 +65,7 @@ def get_smoothed(CURR_VOL_CURVE, HIST_VOL_CURVE):
     result = {}
     for key in (HIST_VOL_CURVE.viewkeys() | CURR_VOL_CURVE.keys()):
         if key in HIST_VOL_CURVE:
-            result.setdefault(key, []).append(HISTORICAL_SMOOTH[key])
+            result.setdefault(key, []).append(HIST_VOL_CURVE[key])
         if key in CURR_VOL_CURVE:
             result.setdefault(key, []).append(CURR_VOL_CURVE[key])
     HIST_VOL_CURVE = result
@@ -135,36 +135,48 @@ def hedge_delta(greeks_exposure_dict):
     target_und_pos = - total_delta
     return target_und_pos
 
-def check_target_trade(curr_pos, order_pos, OPTION_DICT):
+def check_target_trade(curr_pos, target_pos, OPTION_DICT):
+    '''
     target_dict = {k: curr_pos.get(k, 0) + order_pos.get(k, 0) for k in set(curr_pos) | set(order_pos)}
     if UNDERLYING_TICKER not in target_dict.keys():
         target_dict[UNDERLYING_TICKER] = 0
-    target_greeks = update_greeks(target_dict, OPTION_DICT)
+    '''
+    target_greeks = update_greeks(target_pos, OPTION_DICT)
     total_delta = sum([target_greeks[x]['delta'] for x in target_greeks.keys()])
     total_vega = sum([target_greeks[x]['vega'] for x in target_greeks.keys()])
     if abs(total_vega) > 2800:
         #puke if breaching vega limit
-        target_dict = {k: 0 for k in target_dict.keys()}
+        target_pos = {k: 0 for k in curr_pos.keys()}
     if abs(total_delta) > 400:
-        target_dict[UNDERLYING_TICKER] = hedge_delta(target_greeks)
-    return target_dict
+        target_pos[UNDERLYING_TICKER] = hedge_delta(target_greeks)
+    return target_pos
 
 
 def execute_trade(VOL_CURVE, VOL_SPLINE, curr_pos, OPTION_DICT):
     orders = {}
+    target_pos = {}
     for strike in range(80, 120):
         perc_diff = (VOL_CURVE[strike] - VOL_SPLINE[strike])/VOL_CURVE[strike]
         if perc_diff > TRADING_THRESHOLD:
             security = "T" + str(strike) + "C"
-            qty = 1000.0 * perc_diff
+            qty = 100.0 * perc_diff
             # sell qty
-            orders[security] = - qty
-        if perc_diff < - TRADING_THRESHOLD:
+            target_pos[security] = - qty
+        elif perc_diff < - TRADING_THRESHOLD:
             security = "T" + str(strike) + "C"
-            qty = 1000.0 * perc_diff
-            orders[security] = qty
-    adj_target_pos = check_target_trade(curr_pos, orders, OPTION_DICT)
+            qty = 100.0 * perc_diff
+            target_pos[security] = qty
+        else:
+            security = "T" + str(strike) + "C"
+            target_pos[security] = 0
+
+    adj_target_pos = check_target_trade(curr_pos, target_pos, OPTION_DICT)
     submit_orders = {k: round(adj_target_pos.get(k, 0) - curr_pos.get(k, 0)) for k in set(adj_target_pos) | set(curr_pos)}
+    submit_orders = {x: y for x, y in submit_orders.items() if abs(y) > 0.05}
+    if len(submit_orders.keys()) > 3:
+        cutoff = sorted([abs(x) for x in submit_orders.values()])[-3]
+        submit_orders = {x: y for x, y in submit_orders.items() if abs(y) > cutoff}
+
     return submit_orders
 '''
 
