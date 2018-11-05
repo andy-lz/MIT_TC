@@ -4,6 +4,7 @@ from py_vollib.ref_python.black_scholes import implied_volatility
 from py_vollib.black.greeks.analytical import delta, vega
 import re
 import tradersbot as tt
+import sys
 
 t = tt.TradersBot(host=sys.argv[1], id=sys.argv[2], password=sys.argv[3])
 
@@ -13,6 +14,7 @@ HIST_VOL_CURVE = {}
 TIME = 0
 UNDERLYING_TICKER = 'TMXFUT'
 TRADING_THRESHOLD = 0.05
+
 
 def get_opt_dict(sec_price_dict, T):
     OPTION_DICT = {}
@@ -45,6 +47,7 @@ def get_opt_dict(sec_price_dict, T):
             OPTION_DICT[security] = option_char
     return OPTION_DICT
 
+
 def get_vol_curve(OPTION_DICT):
     CURR_VOL_CURVE = {}
     for strike in range (80,121):
@@ -54,6 +57,7 @@ def get_vol_curve(OPTION_DICT):
         put_iv = OPTION_DICT[put_opt]["implied_vol"]
         CURR_VOL_CURVE[strike] = (call_iv + put_iv)/2.0
     return CURR_VOL_CURVE
+
 
 def get_smoothed(CURR_VOL_CURVE, HIST_VOL_CURVE):
     result = {}
@@ -78,6 +82,7 @@ def get_smoothed(CURR_VOL_CURVE, HIST_VOL_CURVE):
     SMOOTHED_VOL_CURVE = dict(zip(x, fitted_val))
     return SMOOTHED_VOL_CURVE, HIST_VOL_CURVE
 
+
 def get_greeks(OPTION_DICT):
     delta_dict = {}
     vega_dict = {}
@@ -95,6 +100,7 @@ def get_greeks(OPTION_DICT):
 
     return delta_dict, vega_dict
 
+
 def update_greeks(pos_dict, OPTION_DICT):
     delta_dict, vega_dict = get_greeks(OPTION_DICT)
     greeks_exposure_dict = {}
@@ -107,23 +113,25 @@ def update_greeks(pos_dict, OPTION_DICT):
                                               "vega": pos_dict[security] * vega_dict[security]}
     return greeks_exposure_dict
 
+
 def hedge_delta(greeks_exposure_dict):
     total_delta = sum([greeks_exposure_dict[x]['delta'] for x in greeks_exposure_dict.keys()])
 
     target_und_pos = - total_delta
     return target_und_pos
 
+
 def check_target_trade(curr_pos, target_pos, OPTION_DICT):
-    '''
+    """
     target_dict = {k: curr_pos.get(k, 0) + order_pos.get(k, 0) for k in set(curr_pos) | set(order_pos)}
     if UNDERLYING_TICKER not in target_dict.keys():
         target_dict[UNDERLYING_TICKER] = 0
-    '''
+    """
     target_greeks = update_greeks(target_pos, OPTION_DICT)
     total_delta = sum([target_greeks[x]['delta'] for x in target_greeks.keys()])
     total_vega = sum([target_greeks[x]['vega'] for x in target_greeks.keys()])
     if abs(total_vega) > 2800:
-        #puke if breaching vega limit
+        # puke if breaching vega limit
         target_pos = {k: 0 for k in curr_pos.keys()}
     if abs(total_delta) > 400:
         target_pos[UNDERLYING_TICKER] = hedge_delta(target_greeks)
@@ -156,47 +164,51 @@ def execute_trade(VOL_CURVE, VOL_SPLINE, curr_pos, OPTION_DICT):
 
     return submit_orders
 
+
 # Initializes the prices
 def ack_register_method(msg, order):
     global SECURITIES
-	security_dict = msg['case_meta']['securities']
-	for security in security_dict.keys():
-		if not(security_dict[security]['tradeable']):
-			continue
-		SECURITIES[security] = security_dict[security]['starting_price']
+    security_dict = msg['case_meta']['securities']
+    for security in security_dict.keys():
+        if not(security_dict[security]['tradeable']):
+            continue
+        SECURITIES[security] = security_dict[security]['starting_price']
+
 
 # Updates latest price
 def market_update_method(msg, order):
-	global SECURITIES
-	global TIME
-	TIME = msg['elapsed_time']
-	SECURITIES[msg['market_state']['ticker']] = msg['market_state']['last_price']
+    global SECURITIES
+    global TIME
+    TIME = msg['elapsed_time']
+    SECURITIES[msg['market_state']['ticker']] = msg['market_state']['last_price']
+
 
 def get_order(curr_pos):
-	global SECURITIES
-	global TIME
-	global HIST_VOL_CURVE
-	OPTION_DICT = get_opt_dict(SECURITIES, TIME)
-	CURR_VOL_CURVE = get_vol_curve(OPTION_DICT)
-	SMOOTHED_VOL_CURVE, HIST_VOL_CURVE = get_smoothed(CURR_VOL_CURVE, HIST_VOL_CURVE)
-	orders = execute_trade(CURR_VOL_CURVE, SMOOTHED_VOL_CURVE, curr_pos, OPTION_DICT)
+    global SECURITIES
+    global TIME
+    global HIST_VOL_CURVE
+    OPTION_DICT = get_opt_dict(SECURITIES, TIME)
+    CURR_VOL_CURVE = get_vol_curve(OPTION_DICT)
+    SMOOTHED_VOL_CURVE, HIST_VOL_CURVE = get_smoothed(CURR_VOL_CURVE, HIST_VOL_CURVE)
+    orders = execute_trade(CURR_VOL_CURVE, SMOOTHED_VOL_CURVE, curr_pos, OPTION_DICT)
 
-	return orders
+    return orders
 
 
 def trader_update_method(msg, order):
-	global SECURITIES
-	positions = msg['trader_state']['positions']
-	orders = get_order(positions)
+    global SECURITIES
+    positions = msg['trader_state']['positions']
+    orders = get_order(positions)
 
-	for security in orders.keys():
-		quant = orders[security]
-		if quant > 0:
-			quant = 1
-			order.addBuy(security, quantity=quant, price=SECURITIES[security])
-		elif quant < 0:
-			quant = 1
-			order.addSell(security, quantity=abs(quant), price=SECURITIES[security])
+    for security in orders.keys():
+        quant = orders[security]
+        if quant > 0:
+            quant = 1
+            order.addBuy(security, quantity=quant, price=SECURITIES[security])
+        elif quant < 0:
+            quant = 1
+            order.addSell(security, quantity=abs(quant), price=SECURITIES[security])
+
 
 t.onAckRegister = ack_register_method
 t.onMarketUpdate = market_update_method
