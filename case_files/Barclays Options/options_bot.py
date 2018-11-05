@@ -1,7 +1,5 @@
 import tradersbot as tt
-import random
 import trade_logic
-import numpy as np
 
 t = tt.TradersBot(host='127.0.0.1', id='trader0', password='trader0')
 
@@ -13,9 +11,7 @@ TIME = 0
 # Initializes the prices
 def ack_register_method(msg, order):
 	global SECURITIES
-	#print msg
 	security_dict = msg['case_meta']['securities']
-	#print security_dict
 	for security in security_dict.keys():
 		if not(security_dict[security]['tradeable']):
 			continue
@@ -45,12 +41,8 @@ def get_order(curr_pos):
 # You do not need to buy/sell here
 def trader_update_method(msg, order):
 	global SECURITIES
-	print TIME
 	positions = msg['trader_state']['positions']
-	#print positions
 	orders = get_order(positions)
-	print "end get order"
-	print orders
 
 	for security in orders.keys():
 		quant = orders[security]
@@ -63,24 +55,6 @@ def trader_update_method(msg, order):
 			quant = 1
 			print ("SELL", security, abs(quant), SECURITIES[security])
 			order.addSell(security, quantity=abs(quant), price=SECURITIES[security])
-	filter_pos = {x:y for x, y in positions.items() if y != 0}
-	print "Positions:", filter_pos
-	#quant = 1
-	#order.addBuy("T104P", quantity=quant, price=SECURITIES["T104P"])
-	#print positions
-
-'''
-	for security in positions.keys():
-		if random.random() < 0.5:
-			quant = 1
-			order.addBuy(security, quantity=quant, price=SECURITIES[security])
-			#order.addBuy(security, quantity=quant,price=SECURITIES[security])
-		else:
-			quant = 1
-			order.addSell(security, quantity=quant, price=SECURITIES[security])
-			#order.addSell(security, quantity=quant,price=SECURITIES[security])
-'''
-
 
 
 ###############################################

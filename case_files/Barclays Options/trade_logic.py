@@ -1,4 +1,3 @@
-import json
 import numpy as np
 import pandas as pd
 from py_vollib.ref_python.black_scholes import black_scholes, implied_volatility
@@ -47,7 +46,6 @@ def get_opt_dict(sec_price_dict, T):
                             "dividend_rate": 0,
                             "implied_vol": iv }
 
-            #print option_char
             OPTION_DICT[security] = option_char
     return OPTION_DICT
 
