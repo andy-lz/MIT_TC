@@ -18,7 +18,7 @@ news_ticks = 15
 fee = 0.0001
 epsilon = 0.0005
 securities = ['TRDRS.LIT', 'TRDRS.DARK']
-multiply_constant = 5
+multiply_constant = 0.8
 
 cash = 0.0
 time = 0
@@ -233,13 +233,15 @@ def informed_shift():
     global news_P0, fee, P0_conf, position_limit, cash, P0_est, multiply_constant
     net_P0 = news_P0
     if news_P0 > P0_est:
-        market_spread = best_ask[0] - P0_est
-        net_P0 -= market_spread
+        if best_ask is not None:
+            market_spread = best_ask[0] - P0_est
+            net_P0 -= market_spread
         if net_P0 <= P0_est:
             return 0
     else:
-        market_spread = P0_est - best_bid[0]
-        net_P0 += market_spread
+        if best_bid is not None:
+            market_spread = P0_est - best_bid[0]
+            net_P0 += market_spread
         if net_P0 >= P0_est:
             return 0
     chg_P0 = net_P0 - P0_est
@@ -355,6 +357,7 @@ def log_out(type_notif, *args, **kwargs):
                     .format(case_length, position_limit, time, cash, position_lit, position_dark, last_price_lit,
                             last_price_dark, P0_est), level=30)
     elif type_notif == 'M':
+        return
         logging.log(msg="Market: time={}, net_pos = {}, last_prices={},{}, asks = {},{},{},  bids={},{},{}, wap={}"
                     .format(time, position_lit + position_dark, last_price_lit, last_price_dark,
                             asks_px, asks_sz, best_ask, bids_px, bids_sz, best_bid, P0_est), level=30)
@@ -372,7 +375,7 @@ def log_out(type_notif, *args, **kwargs):
     elif type_notif == 'T':
         logging.log(msg="Trader: net_pos={}, cash={}, open_orders={}"
                     .format(position_lit + position_dark, cash, open_orders), level=30)
-        logging.log(msg="Positions: Lit={}, Dark={}".format(position_lit, position_dark), level=30)
+        logging.log(msg="Positions: Lit={}, Dark={}, Net Value={}".format(position_lit, position_dark, (position_lit + position_dark)*P0_est + cash), level=30)
 
 
 t = TradersBot(host=sys.argv[1], id=sys.argv[2], password=sys.argv[3])

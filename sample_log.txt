@@ -1,0 +1,107 @@
+ python zhao_hong_algost.py 127.0.0.1 trader0 trader0
+WARNING:root:Register: case_length=450, position_limit=5000, time=-1, cash=100000, positions=0,0. last_prices=200,200, P0_est=200
+WARNING:root:Trader: net_pos=0, cash=100000, open_orders={}
+WARNING:root:Positions: Lit=0, Dark=0, Net Value=100000
+WARNING:root:Trader: net_pos=0, cash=100000, open_orders={}
+WARNING:root:Positions: Lit=0, Dark=0, Net Value=100000
+WARNING:root:Trader: net_pos=0, cash=100000, open_orders={}
+WARNING:root:Positions: Lit=0, Dark=0, Net Value=100000
+{}
+Traceback (most recent call last):
+  File "/home/andy/anaconda3/lib/python3.6/site-packages/tradersbot/__init__.py", line 256, in __handle_read
+    func(msg, order)
+  File "zhao_hong_algost.py", line 165, in update_news
+    process_lit(TradersOrder)
+  File "zhao_hong_algost.py", line 207, in process_lit
+    final_sz = informed_shift()
+  File "zhao_hong_algost.py", line 236, in informed_shift
+    market_spread = best_ask[0] - P0_est
+TypeError: 'NoneType' object is not subscriptable
+WARNING:root:Trader: net_pos=0, cash=100000, open_orders={}
+WARNING:root:Positions: Lit=0, Dark=0, Net Value=100000.0
+WARNING:root:Trader: net_pos=0, cash=100000, open_orders={}
+WARNING:root:Positions: Lit=0, Dark=0, Net Value=100000.0
+WARNING:root:Trader: net_pos=0, cash=100000, open_orders={}
+WARNING:root:Positions: Lit=0, Dark=0, Net Value=100000.0
+WARNING:root:Trader: net_pos=0, cash=100000, open_orders={}
+WARNING:root:Positions: Lit=0, Dark=0, Net Value=100000.0
+WARNING:root:Trader: net_pos=0, cash=100000, open_orders={}
+WARNING:root:Positions: Lit=0, Dark=0, Net Value=100000.0
+WARNING:root:Trader: net_pos=0, cash=100000, open_orders={}
+WARNING:root:Positions: Lit=0, Dark=0, Net Value=100000.0
+WARNING:root:Trader: net_pos=0, cash=100000, open_orders={}
+WARNING:root:Positions: Lit=0, Dark=0, Net Value=100000.0
+WARNING:root:Trader: net_pos=0, cash=100000, open_orders={}
+WARNING:root:Positions: Lit=0, Dark=0, Net Value=100000.0
+WARNING:root:Trader: net_pos=0, cash=100000, open_orders={}
+WARNING:root:Positions: Lit=0, Dark=0, Net Value=100000.0
+WARNING:root:Trader: net_pos=0, cash=100000, open_orders={}
+WARNING:root:Positions: Lit=0, Dark=0, Net Value=100000.0
+WARNING:root:Trader: net_pos=0, cash=100000, open_orders={}
+WARNING:root:Positions: Lit=0, Dark=0, Net Value=100000.0
+WARNING:root:Trader: net_pos=0, cash=100000, open_orders={}
+WARNING:root:Positions: Lit=0, Dark=0, Net Value=100000.0
+WARNING:root:Trader: net_pos=0, cash=100000, open_orders={}
+WARNING:root:Positions: Lit=0, Dark=0, Net Value=100000.0
+WARNING:root:Trader: net_pos=0, cash=100000, open_orders={}
+WARNING:root:Positions: Lit=0, Dark=0, Net Value=100000.0
+WARNING:root:Trader: net_pos=0, cash=100000, open_orders={}
+WARNING:root:Positions: Lit=0, Dark=0, Net Value=100000.0
+WARNING:root:Updating Probabilities: current_P0=201.40008706564436; old_P0=200; news_P0=200.15555555555557; max_move = 2.8000000000000003; chg_px=1.4000870656443567; idx =2; min_diff=1.4000470656443567
+{}
+final -1321
+unfulfilled -1321
+sending in dark market making orders!
+WARNING:root:News: time=17, last_news_time=17, news_updated=False, news_px=201.40008706564436, news_sz=80000, news_ABC=A, news_P0=200.37222222222223, P0_conf=0.6413079676330404
+WARNING:root:Probs: A=[0.33333333 0.33333333 0.33333333],3; B=[0.25 0.25 0.5 ],4; C=[0.33333333 0.33333333 0.33333333],3
+WARNING:root:Positions: Lit=-1000, Dark=0
+{'message_type': 'TRADE', 'trades': [{'trade_id': 309, 'ticker': 'TRDRS.LIT', 'buy_order_id': 792, 'sell_order_id': 807, 'quantity': 143, 'price': 202.06, 'buy': False, 'time': '2018-11-07T19:36:50.700060725-06:00'}, {'trade_id': 310, 'ticker': 'TRDRS.LIT', 'buy_order_id': 772, 'sell_order_id': 807, 'quantity': 207, 'price': 202.05, 'buy': False, 'time': '2018-11-07T19:36:50.700068558-06:00'}, {'trade_id': 311, 'ticker': 'TRDRS.LIT', 'buy_order_id': 793, 'sell_order_id': 807, 'quantity': 222, 'price': 202.05, 'buy': False, 'time': '2018-11-07T19:36:50.700077104-06:00'}, {'trade_id': 312, 'ticker': 'TRDRS.LIT', 'buy_order_id': 765, 'sell_order_id': 807, 'quantity': 268, 'price': 202.04, 'buy': False, 'time': '2018-11-07T19:36:50.700086495-06:00'}, {'trade_id': 313, 'ticker': 'TRDRS.LIT', 'buy_order_id': 794, 'sell_order_id': 807, 'quantity': 160, 'price': 202.04, 'buy': False, 'time': '2018-11-07T19:36:50.70010124-06:00'}]}
+final -2263
+unfulfilled -1263
+{'message_type': 'ACK MODIFY ORDERS', 'orders': [{'order_id': 807, 'ticker': 'TRDRS.LIT', 'buy': False, 'quantity': 0, 'price': 0}, {'order_id': 808, 'ticker': 'TRDRS.DARK', 'buy': True, 'quantity': 1000, 'price': 100}, {'order_id': 809, 'ticker': 'TRDRS.DARK', 'buy': False, 'quantity': 1000, 'price': 400}]}
+{'message_type': 'TRADE', 'trades': [{'trade_id': 314, 'ticker': 'TRDRS.LIT', 'buy_order_id': 794, 'sell_order_id': 810, 'quantity': 108, 'price': 202.04, 'buy': False, 'time': '2018-11-07T19:36:50.703121047-06:00'}, {'trade_id': 315, 'ticker': 'TRDRS.LIT', 'buy_order_id': 766, 'sell_order_id': 810, 'quantity': 303, 'price': 202.03, 'buy': False, 'time': '2018-11-07T19:36:50.703128802-06:00'}, {'trade_id': 316, 'ticker': 'TRDRS.LIT', 'buy_order_id': 795, 'sell_order_id': 810, 'quantity': 303, 'price': 202.03, 'buy': False, 'time': '2018-11-07T19:36:50.703134422-06:00'}, {'trade_id': 317, 'ticker': 'TRDRS.LIT', 'buy_order_id': 767, 'sell_order_id': 810, 'quantity': 286, 'price': 202.02, 'buy': False, 'time': '2018-11-07T19:36:50.703139592-06:00'}]}
+final -2263
+unfulfilled -263
+{'message_type': 'ACK MODIFY ORDERS', 'orders': [{'order_id': 810, 'ticker': 'TRDRS.LIT', 'buy': False, 'quantity': 0, 'price': 0}]}
+{'message_type': 'TRADE', 'trades': [{'trade_id': 318, 'ticker': 'TRDRS.LIT', 'buy_order_id': 767, 'sell_order_id': 811, 'quantity': 43, 'price': 202.02, 'buy': False, 'time': '2018-11-07T19:36:50.705078356-06:00'}, {'trade_id': 319, 'ticker': 'TRDRS.LIT', 'buy_order_id': 796, 'sell_order_id': 811, 'quantity': 220, 'price': 202.02, 'buy': False, 'time': '2018-11-07T19:36:50.705085393-06:00'}]}
+{'message_type': 'ACK MODIFY ORDERS', 'orders': [{'order_id': 811, 'ticker': 'TRDRS.LIT', 'buy': False, 'quantity': 0, 'price': 0}]}
+WARNING:root:Trader: net_pos=-2263, cash=557206.6300000001, open_orders={'808': {'order_id': 808, 'ticker': 'TRDRS.DARK', 'buy': True, 'quantity': 1000, 'price': 100}, '809': {'order_id': 809, 'ticker': 'TRDRS.DARK', 'buy': False, 'quantity': 1000, 'price': 400}}
+WARNING:root:Positions: Lit=-2263, Dark=0, Net Value=100266.89175569639
+WARNING:root:Trader: net_pos=-2263, cash=557206.6300000001, open_orders={'808': {'order_id': 808, 'ticker': 'TRDRS.DARK', 'buy': True, 'quantity': 1000, 'price': 100}, '809': {'order_id': 809, 'ticker': 'TRDRS.DARK', 'buy': False, 'quantity': 1000, 'price': 400}}
+WARNING:root:Positions: Lit=-2263, Dark=0, Net Value=99886.42636185646
+WARNING:root:Trader: net_pos=-2263, cash=557206.6300000001, open_orders={'808': {'order_id': 808, 'ticker': 'TRDRS.DARK', 'buy': True, 'quantity': 1000, 'price': 100}, '809': {'order_id': 809, 'ticker': 'TRDRS.DARK', 'buy': False, 'quantity': 1000, 'price': 400}}
+WARNING:root:Positions: Lit=-2263, Dark=0, Net Value=99315.5774881037
+WARNING:root:Trader: net_pos=-2263, cash=557206.6300000001, open_orders={'808': {'order_id': 808, 'ticker': 'TRDRS.DARK', 'buy': True, 'quantity': 1000, 'price': 100}, '809': {'order_id': 809, 'ticker': 'TRDRS.DARK', 'buy': False, 'quantity': 1000, 'price': 400}}
+WARNING:root:Positions: Lit=-2263, Dark=0, Net Value=99325.51457686082
+WARNING:root:Trader: net_pos=-2263, cash=557206.6300000001, open_orders={'809': {'order_id': 809, 'ticker': 'TRDRS.DARK', 'buy': False, 'quantity': 1000, 'price': 400}, '808': {'order_id': 808, 'ticker': 'TRDRS.DARK', 'buy': True, 'quantity': 1000, 'price': 100}}
+WARNING:root:Positions: Lit=-2263, Dark=0, Net Value=98985.1007926038
+WARNING:root:Trader: net_pos=-2263, cash=557206.6300000001, open_orders={'808': {'order_id': 808, 'ticker': 'TRDRS.DARK', 'buy': True, 'quantity': 1000, 'price': 100}, '809': {'order_id': 809, 'ticker': 'TRDRS.DARK', 'buy': False, 'quantity': 1000, 'price': 400}}
+WARNING:root:Positions: Lit=-2263, Dark=0, Net Value=98984.4624544995
+WARNING:root:Trader: net_pos=-2263, cash=557206.6300000001, open_orders={'808': {'order_id': 808, 'ticker': 'TRDRS.DARK', 'buy': True, 'quantity': 1000, 'price': 100}, '809': {'order_id': 809, 'ticker': 'TRDRS.DARK', 'buy': False, 'quantity': 1000, 'price': 400}}
+WARNING:root:Positions: Lit=-2263, Dark=0, Net Value=98676.65778216498
+{'message_type': 'TRADE', 'trades': [{'trade_id': 466, 'ticker': 'TRDRS.DARK', 'buy_order_id': 1169, 'sell_order_id': 809, 'quantity': 1000, 'price': 400, 'buy': True, 'time': '2018-11-07T19:36:57.780749091-06:00'}]}
+WARNING:root:Trader: net_pos=-3263, cash=957206.6300000001, open_orders={'808': {'order_id': 808, 'ticker': 'TRDRS.DARK', 'buy': True, 'quantity': 1000, 'price': 100}}
+WARNING:root:Positions: Lit=-2263, Dark=-1000, Net Value=296240.0913453718
+WARNING:root:Trader: net_pos=-3263, cash=957206.6300000001, open_orders={'808': {'order_id': 808, 'ticker': 'TRDRS.DARK', 'buy': True, 'quantity': 1000, 'price': 100}}
+WARNING:root:Positions: Lit=-2263, Dark=-1000, Net Value=295969.1017453142
+WARNING:root:Trader: net_pos=-3263, cash=957206.6300000001, open_orders={'808': {'order_id': 808, 'ticker': 'TRDRS.DARK', 'buy': True, 'quantity': 1000, 'price': 100}}
+WARNING:root:Positions: Lit=-2263, Dark=-1000, Net Value=296052.00083807576
+WARNING:root:Trader: net_pos=-3263, cash=957206.6300000001, open_orders={'808': {'order_id': 808, 'ticker': 'TRDRS.DARK', 'buy': True, 'quantity': 1000, 'price': 100}}
+WARNING:root:Positions: Lit=-2263, Dark=-1000, Net Value=296066.1220668969
+WARNING:root:Trader: net_pos=-3263, cash=957206.6300000001, open_orders={'808': {'order_id': 808, 'ticker': 'TRDRS.DARK', 'buy': True, 'quantity': 1000, 'price': 100}}
+WARNING:root:Positions: Lit=-2263, Dark=-1000, Net Value=295009.4862756523
+WARNING:root:Trader: net_pos=-3263, cash=957206.6300000001, open_orders={'808': {'order_id': 808, 'ticker': 'TRDRS.DARK', 'buy': True, 'quantity': 1000, 'price': 100}}
+WARNING:root:Positions: Lit=-2263, Dark=-1000, Net Value=295011.0056733367
+WARNING:root:Trader: net_pos=-3263, cash=957206.6300000001, open_orders={'808': {'order_id': 808, 'ticker': 'TRDRS.DARK', 'buy': True, 'quantity': 1000, 'price': 100}}
+WARNING:root:Positions: Lit=-2263, Dark=-1000, Net Value=293591.93834904674
+WARNING:root:Trader: net_pos=-3263, cash=957206.6300000001, open_orders={'808': {'order_id': 808, 'ticker': 'TRDRS.DARK', 'buy': True, 'quantity': 1000, 'price': 100}}
+WARNING:root:Positions: Lit=-2263, Dark=-1000, Net Value=292053.2355904989
+WARNING:root:Updating Probabilities: current_P0=203.84885937345624; old_P0=201.40008706564436; news_P0=200.37222222222223; max_move = 3.2; chg_px=2.448772307811879; idx =2; min_diff=2.4487323078118792
+{'808': {'order_id': 808, 'ticker': 'TRDRS.DARK', 'buy': True, 'quantity': 1000, 'price': 100}}
+final -2984
+unfulfilled 279
+sending in dark market making orders!
+WARNING:root:News: time=32, last_news_time=32, news_updated=False, news_px=203.84885937345624, news_sz=-50000, news_ABC=C, news_P0=200.30555555555554, P0_conf=0.8815708577539848
+WARNING:root:Probs: A=[0.25 0.25 0.5 ],4; B=[0.25 0.25 0.5 ],4; C=[0.33333333 0.33333333 0.33333333],3
+WARNING:root:Positions: Lit=-1984, Dark=-1000
+WebSocket connection has closed
