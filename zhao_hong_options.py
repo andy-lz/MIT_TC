@@ -1,10 +1,9 @@
 import numpy as np
 import pandas as pd
-from py_vollib.ref_python.black_scholes import implied_volatility
-from py_vollib.black.greeks.analytical import delta, vega
+from scipy.stats import norm
+from scipy.optimize import brentq
 import re
 import tradersbot as tt
-import sys
 
 t = tt.TradersBot(host=sys.argv[1], id=sys.argv[2], password=sys.argv[3])
 
