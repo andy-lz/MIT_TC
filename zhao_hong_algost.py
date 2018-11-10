@@ -40,6 +40,7 @@ news_ABC = ''  # Who sent in the news?
 news_sz = 0.0  # How much did they want
 news_px = 0.0  # Lit price at time of news
 unfulfilled_sz = 0.0
+final_sz = 0.0
 
 news_P0 = 0.0
 P0_est = 200.0
@@ -104,11 +105,10 @@ def update_market(msg, TradersOrder):
             P0_est = get_wap(bids_px, bids_sz, asks_px, asks_sz)
     else:
         last_price_dark = market_state['last_price']
-    log_out('M')
 
 
 def update_trader(msg, TradersOrder):
-    global time, cash, position_lit, position_dark, open_orders
+    global time, cash, position_lit, position_dark, open_orders, final_sz
     # time = msg['time']
     trader_state = msg['trader_state']
 
@@ -117,6 +117,7 @@ def update_trader(msg, TradersOrder):
     position_dark = trader_state['positions']['TRDRS.DARK']
     net_pos = position_lit + position_dark
     open_orders = trader_state['open_orders']
+    unfulfilled_sz = final_sz - net_pos
     # clear out positions near end of case
     if case_length - time < 7 and net_pos != 0:
         if abs(net_pos) > max_order_size:
@@ -129,17 +130,30 @@ def update_trader(msg, TradersOrder):
             sell_off(amt, TradersOrder)
     log_out('T')
 
-
 def update_trade(msg, TradersOrder):
     print(msg)
-    global unfulfilled_sz, securities, P0_est, news_P0, position_lit, position_dark
+    global unfulfilled_sz, securities, P0_est, news_P0, position_lit, position_dark, max_order_size, position_limit, start_price
     for i in msg['trades']:
         if i['ticker'] == securities[1]:
             if i['buy']:
                 position_dark -= i['quantity']
                 unfulfilled_sz -= i['quantity']
+            else:
+                position_dark += i['quantity']
+                unfulfilled_sz += i['quantity']
     if unfulfilled_sz != 0:  # and msg['trades'][0]['ticker'] == securities[0]:
         process_lit(TradersOrder)
+    '''
+    elif time - last_news_time > 3: 
+        if asks_sz.sum() > bids_sz.sum():
+            TradersOrder.addBuy(securities[0], 
+                         min(max_order_size, position_limit - (position_lit + position_dark)), 
+                         0.5 * start_price)
+        else:
+            TradersOrder.addSell(securities[0], 
+                          min(max_order_size, position_limit + (position_lit+ position_dark)), 
+                          1.5 * start_price)
+    '''
 
 
 def update_order(msg, TradersOrder):
@@ -165,7 +179,6 @@ def update_news(msg, TradersOrder):
     news_calc()
     process_lit(TradersOrder)
     process_dark(TradersOrder)
-    log_out('N')
 
 
 def cancel_all_orders(order):
@@ -177,7 +190,7 @@ def cancel_all_orders(order):
 
 
 def process_dark(order):
-    global time, case_length, position_dark, position_lit, position_limit, securities
+    global time, case_length, position_dark, position_lit, position_limit, securities, C, news_sz
     global news_P0, fee, P0_conf, start_price
     net_pos = position_lit + position_dark
     if (position_limit * 0.2) > (position_limit - abs(net_pos)):
@@ -185,22 +198,25 @@ def process_dark(order):
             return
     if time * 2 < case_length:
         if news_sz <= 0:
-            order.addBuy(securities[1], 1000, start_price / (2 * (case_length - time)/case_length))
+            weight_avg = (news_px - fee + C*news_sz - P0_conf*2) * (1- (2*time/case_length)) + \
+                         (news_P0 - fee - P0_conf * 2)*(2*time/case_length)
+            order.addBuy(securities[1], int(max(1000, position_limit*0.8 - net_pos)), weight_avg)
         else:
-            order.addSell(securities[1], 1000, start_price * (2 * (case_length - time)/case_length))
+            weight_avg = (news_px + fee + C*news_sz + P0_conf*2) * (1- (2*time/case_length)) + \
+                        (news_P0 + fee + P0_conf * 2)*(2*time/case_length)
+            order.addSell(securities[1], int(max(1000, position_limit*0.8 + net_pos)), weight_avg)
     else:
         if news_sz <= 0:
-            order.addBuy(securities[1], 1000, news_P0 - fee - P0_conf * 2)
+            order.addBuy(securities[1], int(max(1000, position_limit*0.8 - net_pos)), news_P0 - fee - P0_conf * 2)
             # order.addSell(securities[1], 1000, news_P0*1000)
         else:
-            order.addSell(securities[1], 1000, news_P0 + fee + P0_conf * 2)
+            order.addSell(securities[1], int(max(1000, position_limit*0.8 + net_pos)), news_P0 + fee + P0_conf * 2)
             # order.addBuy(securities[1], 1000, 0)
 
 
 def process_lit(order):
-    print("process_lit")
     # Calculate required edge
-    global position_dark, position_lit, news_P0, P0_conf, C, P0_est, fee, best_bid, best_ask, unfulfilled_sz
+    global position_dark, position_lit, news_P0, P0_conf, C, P0_est, fee, best_bid, best_ask, unfulfilled_sz, final_sz
     net_pos = position_dark + position_lit
     '''
     if news_P0 > 0:
@@ -228,10 +244,12 @@ def process_lit(order):
 
 def buy_up(sz, order):
     order.addBuy(securities[0], int(sz))
+    #order.addSell(securities[0], int(sz), 1.5 * start_price)
 
 
 def sell_off(sz, order):
     order.addSell(securities[0], int(abs(sz)))
+    #order.addBuy(securities[0], int(abs(sz)), 0.5 * start_price)
 
 
 def informed_shift():
@@ -315,7 +333,6 @@ def update_probs():
         if abs(chg_px - (i * news_sz)) < min_diff:
             min_diff = abs(chg_px - i)
             idx = e
-    log_out('P', chg_px, idx, min_diff)
     if news_ABC == 'A':
         A_expect *= A_total
         A_expect[idx] += 1
