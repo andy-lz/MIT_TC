@@ -4,6 +4,7 @@ from scipy.stats import norm
 from scipy.optimize import brentq
 import re
 import tradersbot as tt
+import sys
 
 t = tt.TradersBot(host=sys.argv[1], id=sys.argv[2], password=sys.argv[3])
 
@@ -128,22 +129,25 @@ def get_vol_curve(OPTION_DICT):
     return CURR_VOL_CURVE
 
 def get_smoothed(CURR_VOL_CURVE, HIST_VOL_CURVE):
-    result = {}
-    for key in (HIST_VOL_CURVE.viewkeys() | CURR_VOL_CURVE.keys()):
-        if key in HIST_VOL_CURVE:
-            result.setdefault(key, []).append(HIST_VOL_CURVE[key])
-        if key in CURR_VOL_CURVE:
-            result.setdefault(key, []).append(CURR_VOL_CURVE[key])
-    HIST_VOL_CURVE = result
-    lookback = min(len(HIST_VOL_CURVE.values()[0]), 8)
+    global TIME
+
+    for k in CURR_VOL_CURVE.keys():
+        if k in HIST_VOL_CURVE.keys():
+            HIST_VOL_CURVE[k].append(CURR_VOL_CURVE[k])
+        else:
+            HIST_VOL_CURVE[k] = [CURR_VOL_CURVE[k]]
+
+    lookback = min(max(TIME - 1, 1), 8)
 
     ema_vol_curve = {}
+
     for strike in HIST_VOL_CURVE.keys():
         data = pd.Series(HIST_VOL_CURVE[strike])
         ema_vol_curve[strike] = list(data.ewm(span=lookback, adjust=False).mean())[-1]
 
-    x = ema_vol_curve.keys()
-    y = ema_vol_curve.values()
+    x = list(ema_vol_curve.keys())
+    y = list(ema_vol_curve.values())
+
     coef = np.polyfit(x, y, 3)
     fitted_val = np.polyval(coef, x)
 
