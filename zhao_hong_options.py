@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
-from py_vollib.ref_python.black_scholes import implied_volatility
-from py_vollib.black.greeks.analytical import delta, vega
+from scipy.stats import norm
+from scipy.optimize import brentq
 import re
 import tradersbot as tt
 
@@ -13,6 +13,73 @@ HIST_VOL_CURVE = {}
 TIME = 0
 UNDERLYING_TICKER = 'TMXFUT'
 TRADING_THRESHOLD = 0.05
+
+# Supporting Black Scholes
+def d1(S, K, t, r, sigma):  # see Hull, page 292
+    """Calculate the d1 component of the Black-Scholes PDE.
+    """
+    N = norm.cdf
+    sigma_squared = sigma * sigma
+    numerator = np.log(S / float(K)) + (r + sigma_squared / 2.) * t
+    denominator = sigma * np.sqrt(t)
+
+    if not denominator:
+        print ('')
+    return numerator / denominator
+
+def d2(S, K, t, r, sigma):  # see Hull, page 292
+    """Calculate the d2 component of the Black-Scholes PDE.
+    """
+    return d1(S, K, t, r, sigma) - sigma * np.sqrt(t)
+
+def black_scholes(flag, S, K, t, r, sigma):
+    """Return the Black-Scholes option price implemented in
+        python (for reference).
+    """
+    N = norm.cdf
+    e_to_the_minus_rt = np.exp(-r * t)
+    D1 = d1(S, K, t, r, sigma)
+    D2 = d2(S, K, t, r, sigma)
+    if flag == 'c':
+        return S * N(D1) - K * e_to_the_minus_rt * N(D2)
+    else:
+        return - S * N(-D1) + K * e_to_the_minus_rt * N(-D2)
+
+def delta(flag, F, K, t, r, sigma):
+    """Returns the Black delta of an option.
+    """
+    N = norm.cdf
+
+    D1 = d1(F, K, t, r, sigma)
+
+    if flag == 'p':
+        return - np.exp(-r * t) * N(-D1)
+    else:
+        return np.exp(-r * t) * N(D1)
+
+def vega(flag, F, K, t, r, sigma):
+    """Returns the Black vega of an option.
+    """
+    ONE_OVER_SQRT_TWO_PI = 0.3989422804014326779399460599343818684758586311649
+    pdf = lambda x: ONE_OVER_SQRT_TWO_PI * np.exp(-.5 * x * x)
+    D1 = d1(F, K, t, r, sigma)
+    return F * np.exp(-r * t) * pdf(D1) * np.sqrt(t) * 0.01
+
+def implied_volatility(price, S, K, t, r, flag):
+    """Calculate the Black-Scholes implied volatility.
+    """
+    N = norm.cdf
+    f = lambda sigma: price - black_scholes(flag, S, K, t, r, sigma)
+
+    return brentq(
+        f,
+        a=1e-12,
+        b=100,
+        xtol=1e-15,
+        rtol=1e-15,
+        maxiter=1000,
+        full_output=False
+    )
 
 def get_opt_dict(sec_price_dict, T):
     OPTION_DICT = {}
@@ -29,7 +96,12 @@ def get_opt_dict(sec_price_dict, T):
             price = sec_price_dict[security]
 
             try:
-                iv = implied_volatility.implied_volatility(price, und_price, strike, ttm, 0, opt_type)
+                iv = implied_volatility(float(price),
+                                        float(und_price),
+                                        float(strike),
+                                        float(ttm),
+                                        0.0,
+                                        opt_type)
             except:
                 iv = 0
 
@@ -159,44 +231,42 @@ def execute_trade(VOL_CURVE, VOL_SPLINE, curr_pos, OPTION_DICT):
 # Initializes the prices
 def ack_register_method(msg, order):
     global SECURITIES
-	security_dict = msg['case_meta']['securities']
-	for security in security_dict.keys():
-		if not(security_dict[security]['tradeable']):
-			continue
-		SECURITIES[security] = security_dict[security]['starting_price']
+    security_dict = msg['case_meta']['securities']
+    for security in security_dict.keys():
+        if not(security_dict[security]['tradeable']):
+            continue
+        SECURITIES[security] = security_dict[security]['starting_price']
 
 # Updates latest price
 def market_update_method(msg, order):
-	global SECURITIES
-	global TIME
-	TIME = msg['elapsed_time']
-	SECURITIES[msg['market_state']['ticker']] = msg['market_state']['last_price']
+    global SECURITIES
+    global TIME
+    TIME = msg['elapsed_time']
+    print TIME
+    SECURITIES[msg['market_state']['ticker']] = msg['market_state']['last_price']
 
 def get_order(curr_pos):
-	global SECURITIES
-	global TIME
-	global HIST_VOL_CURVE
-	OPTION_DICT = get_opt_dict(SECURITIES, TIME)
-	CURR_VOL_CURVE = get_vol_curve(OPTION_DICT)
-	SMOOTHED_VOL_CURVE, HIST_VOL_CURVE = get_smoothed(CURR_VOL_CURVE, HIST_VOL_CURVE)
-	orders = execute_trade(CURR_VOL_CURVE, SMOOTHED_VOL_CURVE, curr_pos, OPTION_DICT)
-
-	return orders
-
+    global SECURITIES
+    global TIME
+    global HIST_VOL_CURVE
+    OPTION_DICT = get_opt_dict(SECURITIES, TIME)
+    CURR_VOL_CURVE = get_vol_curve(OPTION_DICT)
+    SMOOTHED_VOL_CURVE, HIST_VOL_CURVE = get_smoothed(CURR_VOL_CURVE, HIST_VOL_CURVE)
+    orders = execute_trade(CURR_VOL_CURVE, SMOOTHED_VOL_CURVE, curr_pos, OPTION_DICT)
+    return orders
 
 def trader_update_method(msg, order):
-	global SECURITIES
-	positions = msg['trader_state']['positions']
-	orders = get_order(positions)
+    global SECURITIES
+    positions = msg['trader_state']['positions']
+    orders = get_order(positions)
 
-	for security in orders.keys():
-		quant = orders[security]
-		if quant > 0:
-			quant = 1
-			order.addBuy(security, quantity=quant, price=SECURITIES[security])
-		elif quant < 0:
-			quant = 1
-			order.addSell(security, quantity=abs(quant), price=SECURITIES[security])
+    for security in orders.keys():
+        quant = orders[security]
+        quant = 1
+        if quant > 0:
+            order.addBuy(security, quantity=quant, price=SECURITIES[security])
+        elif quant < 0:
+            order.addSell(security, quantity=abs(quant), price=SECURITIES[security])
 
 t.onAckRegister = ack_register_method
 t.onMarketUpdate = market_update_method
