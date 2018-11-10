@@ -137,6 +137,7 @@ def update_trade(msg, TradersOrder):
         if i['ticker'] == securities[1]:
             if i['buy']:
                 position_dark -= i['quantity']
+                unfulfilled_sz -= i['quantity']
     if unfulfilled_sz != 0:  # and msg['trades'][0]['ticker'] == securities[0]:
         process_lit(TradersOrder)
 
@@ -170,29 +171,34 @@ def update_news(msg, TradersOrder):
 def cancel_all_orders(order):
     global open_orders
     if open_orders is not None:
-        print(open_orders)
+        print("open orders", open_orders)
         for k, v in open_orders.items():
-            order.addCancel(v['ticker'], k)  # todo fix params
+            order.addCancel(v['ticker'], k)
 
 
 def process_dark(order):
     global time, case_length, position_dark, position_lit, position_limit, securities
     global news_P0, fee, P0_conf, start_price
     net_pos = position_lit + position_dark
-    if 1000 > position_limit - abs(net_pos):
-        return
-    print("sending in dark market making orders!")
+    if (position_limit * 0.2) > (position_limit - abs(net_pos)):
+        if (net_pos < 0 and news_sz >= 0) or (net_pos > 0 and news_sz <= 0):
+            return
     if time * 2 < case_length:
-        order.addBuy(securities[1], 1000, start_price / 2)
-        order.addSell(securities[1], 1000, start_price * 2)
+        if news_sz <= 0:
+            order.addBuy(securities[1], 1000, start_price / (2 * (case_length - time)/case_length))
+        else:
+            order.addSell(securities[1], 1000, start_price * (2 * (case_length - time)/case_length))
     else:
-        order.addBuy(securities[1], 1000, news_P0 - fee - P0_conf * 2)
-        # order.addSell(securities[1], 1000, news_P0*1000)
-        order.addSell(securities[1], 1000, news_P0 + fee + P0_conf * 2)
-        # order.addBuy(securities[1], 1000, 0)
+        if news_sz <= 0:
+            order.addBuy(securities[1], 1000, news_P0 - fee - P0_conf * 2)
+            # order.addSell(securities[1], 1000, news_P0*1000)
+        else:
+            order.addSell(securities[1], 1000, news_P0 + fee + P0_conf * 2)
+            # order.addBuy(securities[1], 1000, 0)
 
 
 def process_lit(order):
+    print("process_lit")
     # Calculate required edge
     global position_dark, position_lit, news_P0, P0_conf, C, P0_est, fee, best_bid, best_ask, unfulfilled_sz
     net_pos = position_dark + position_lit
@@ -278,11 +284,11 @@ def informed_shift():
                 sz_final = max(-1 * position_limit - net_pos, -1 * max_order_size)
             else:
                 sz_final = 0
-
+ 
     return sz_final
     '''
-
-
+ 
+ 
 def news_calc():
     global A_expect, B_expect, C_expect, news_P0, P0_conf, dark_orders, expectations, news_sz
     if news_ABC == 'A':
@@ -325,33 +331,33 @@ def update_probs():
         C_expect[idx] += 1
         C_total += 1
         C_expect /= C_total
-
-
+ 
+ 
 def get_wap(bid_px_arr, bid_sz_arr, ask_px_arr, ask_sz_arr):
     bid_sz_sum = bid_sz_arr.sum()
     ask_sz_sum = ask_sz_arr.sum()
-
+ 
     bid_px_wap = np.dot(bid_px_arr, bid_sz_arr) / bid_sz_sum
     ask_px_wap = np.dot(ask_px_arr, ask_sz_arr) / ask_sz_sum
     return ((bid_px_wap * ask_sz_sum) + (ask_px_wap * bid_sz_sum)) / (bid_sz_sum + ask_sz_sum)
-
-
+ 
+ 
 def mean_discrete(arr_expect, arr_prob, multiplier):
     return np.average(arr_expect * arr_prob) * multiplier
-
-
+ 
+ 
 def sd_discrete(arr_expect, arr_prob, multiplier):
     mu = np.average(arr_expect * arr_prob)
     var = np.average((arr_expect - mu)**2 * arr_prob)
     return math.sqrt(var)*abs(multiplier)
-
-
+ 
+ 
 def log_out(type_notif, *args, **kwargs):
     global case_length, position_limit, time, cash, position_lit, position_dark, last_price_lit, last_price_dark, P0_est
     global asks_px, asks_sz, best_ask, bids_px, bids_sz, best_bid, open_orders
     global last_news_time, news_updated, news_ABC, news_px, news_P0, P0_conf
     global A_expect, B_expect, C_expect, A_total, B_total, C_total
-
+ 
     if type_notif == 'R':
         logging.log(msg="Register: case_length={}, position_limit={}, time={}, cash={}, positions={},{}. last_prices={},{}, P0_est={}"
                     .format(case_length, position_limit, time, cash, position_lit, position_dark, last_price_lit,
@@ -367,24 +373,24 @@ def log_out(type_notif, *args, **kwargs):
         logging.log(msg="Probs: A={},{}; B={},{}; C={},{}"
                     .format(A_expect, A_total, B_expect, B_total, C_expect, C_total), level=30)
         logging.log(msg="Positions: Lit={}, Dark={}".format(position_lit, position_dark), level=30)
-
+ 
     elif type_notif == 'P':
         logging.log(msg="Updating Probabilities: current_P0={}; old_P0={}; news_P0={}; max_move = {}; chg_px={}; idx ={}; min_diff={}"
                     .format(P0_est, news_px, news_P0, expectations[2]*news_sz, args[0], args[1], args[2]), level=30)
-
+ 
     elif type_notif == 'T':
         logging.log(msg="Trader: net_pos={}, cash={}, open_orders={}"
                     .format(position_lit + position_dark, cash, open_orders), level=30)
         logging.log(msg="Positions: Lit={}, Dark={}, Net Value={}".format(position_lit, position_dark, (position_lit + position_dark)*P0_est + cash), level=30)
-
-
+ 
+ 
 t = TradersBot(host=sys.argv[1], id=sys.argv[2], password=sys.argv[3])
-
+ 
 t.onAckRegister = register
 t.onMarketUpdate = update_market
 t.onTraderUpdate = update_trader
 t.onTrade = update_trade
 t.onAckModifyOrders = update_order
 t.onNews = update_news
-
+ 
 t.run()
