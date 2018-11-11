@@ -120,9 +120,6 @@ def allocate(simple_args, medium_args, hard_args):
     P = np.array([simple_price, medium_price, hard_price])
     dP = np.array([simple_prediction - simple_price, medium_prediction - medium_price, hard_prediction - hard_price])
     return list(allocation_logic_3(dP, P, 0.0002))
-    # Sample: allocate all money (except a small threshold) to medium
-    # return (0, (100000000 - 1) / medium_price, 0)
-
 
 def f_i(N_i, a):
     if N_i < 0:
