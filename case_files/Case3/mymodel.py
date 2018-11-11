@@ -26,7 +26,7 @@ class SimpleModel(object):
         lin_regressor = LinearRegression()
 
         # pass the order of your polynomial here
-        poly = PolynomialFeatures(3)
+        poly = PolynomialFeatures(2)
 
         # convert to be used further to linear regression
         X_transform = poly.fit_transform(X_train)
@@ -37,7 +37,7 @@ class SimpleModel(object):
         return reg
 
     def predict(self, prev_price, x1, x2):
-        poly = PolynomialFeatures(3)
+        poly = PolynomialFeatures(2)
         reg = self.train()
         input_transform = poly.fit_transform(np.array([[prev_price, x1, x2]]))
         next_price = reg.predict(input_transform)[0]
