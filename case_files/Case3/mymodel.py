@@ -52,7 +52,7 @@ class MediumModel(object):
     def train(self):
         X_train = np.array(zip(self.prev_price, self.x1, self.x2, self.x3))
         Y_train = np.array(np.log(self.next_price)-np.log(self.prev_price))
-        lin_regressor = Linear Regression()
+        lin_regressor = LinearRegression()
         reg = lin_regressor.fit(X_train, Y_train)
         return reg
 
