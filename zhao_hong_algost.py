@@ -62,7 +62,7 @@ def register(msg, TradersOrder):
     global case_length, position_limit, time, cash, position_lit, position_dark
     global P0_est, last_price_lit, last_price_dark, start_price
     case_length = msg['case_meta']['case_length']
-    position_limit = msg['case_meta']['underlyings']['TRDRS']['limit']
+    position_limit = msg['case_meta']['underlyings']['TRDRS.LIT']['limit']
     time = msg['elapsed_time']
     cash = msg['trader_state']['cash']['USD']
     position_lit = msg['trader_state']['positions']['TRDRS.LIT']
