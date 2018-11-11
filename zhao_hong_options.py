@@ -242,11 +242,11 @@ def execute_trade(VOL_CURVE, VOL_SPLINE, curr_pos, OPTION_DICT):
     adj_target_pos = check_target_trade(curr_pos, target_pos, OPTION_DICT)
     submit_orders = {k: round(adj_target_pos.get(k, 0) - curr_pos.get(k, 0)) for k in set(adj_target_pos) | set(curr_pos)}
     submit_orders = {x: y for x, y in submit_orders.items() if abs(y) > 0.05}
-    '''
-    if len(submit_orders.keys()) > 3:
-        cutoff = sorted([abs(x) for x in submit_orders.values()])[-3]
+
+    if len(submit_orders.keys()) > 80:
+        cutoff = sorted([abs(x) for x in submit_orders.values()])[-80]
         submit_orders = {x: y for x, y in submit_orders.items() if abs(y) > cutoff}
-    '''
+
     return submit_orders
 
 # Initializes the prices
