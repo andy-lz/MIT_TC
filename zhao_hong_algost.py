@@ -165,11 +165,11 @@ def update_trade(msg, TradersOrder):
             if asks_sz.sum() >= bids_sz.sum():
                 TradersOrder.addBuy(securities[0], 
                                     min(max_order_size, int(position_limit - (position_lit+position_dark))), 
-                                    0.5 * start_price)
+                                    0.25 * start_price)
             else:
                 TradersOrder.addSell(securities[0], 
                                      min(max_order_size, int(position_limit + (position_lit+position_dark))), 
-                                     1.5 * start_price)                
+                                     2 * start_price)                
 
 
 def update_order(msg, TradersOrder):
@@ -213,20 +213,20 @@ def process_dark(order):
             return
     if time * 2 < case_length:
         if news_sz <= 0:
-            weight_avg = (news_px - fee + C*news_sz - P0_conf) * (1- (2*time/case_length)) + \
-                         (news_P0 - fee - P0_conf)*(2*time/case_length)
+            weight_avg = (news_px - fee + C*news_sz - P0_conf / 2) * (1- (2*time/case_length)) + \
+                         (news_P0 - fee - P0_conf/2)*(2*time/case_length)
             order.addBuy(securities[1], int(max(1000, position_limit*0.7 - net_pos)), weight_avg)
         else:
-            weight_avg = (news_px + fee + C*news_sz + P0_conf) * (1- (2*time/case_length)) + \
-                        (news_P0 + fee + P0_conf)*(2*time/case_length)
+            weight_avg = (news_px + fee + C*news_sz + P0_conf / 2) * (1- (2*time/case_length)) + \
+                        (news_P0 + fee + P0_conf/2)*(2*time/case_length)
             order.addSell(securities[1], int(max(1000, position_limit*0.7 + net_pos)), weight_avg)
     else:
         if case_length - time >20: 
             if news_sz <= 0:
-                order.addBuy(securities[1], int(max(1000, position_limit*0.7 - net_pos)), news_P0 - fee - P0_conf)
+                order.addBuy(securities[1], int(max(1000, position_limit*0.7 - net_pos)), news_P0 - fee - P0_conf/2)
             # order.addSell(securities[1], 1000, news_P0*1000)
             else:
-                order.addSell(securities[1], int(max(1000, position_limit*0.7 + net_pos)), news_P0 + fee + P0_conf)
+                order.addSell(securities[1], int(max(1000, position_limit*0.7 + net_pos)), news_P0 + fee + P0_conf/2)
             # order.addBuy(securities[1], 1000, 0)
 
 
@@ -260,7 +260,7 @@ def buy_up(sz, order):
     position_lit += filled_sz
     if case_length - time > 8:
         order.addBuy(securities[0], filled_sz, news_px + C*news_sz)
-        order.addSell(securities[0], filled_sz, 2 * start_price)
+        order.addSell(securities[0], filled_sz, 2.5 * start_price)
 
 def sell_off(sz, order):
     global unfulfilled_sz, position_lit, securities, start_price, best_bid, C, news_px, news_sz
@@ -269,7 +269,7 @@ def sell_off(sz, order):
     position_lit -= filled_sz
     if case_length - time > 8:
         order.addSell(securities[0], filled_sz, news_px - C*news_sz)
-        order.addBuy(securities[0], filled_sz, 0.25 * start_price)
+        order.addBuy(securities[0], filled_sz, 0.1 * start_price)
 
 def buy_up_temp(sz, order):
     global unfulfilled_sz, position_lit, securities, start_price, best_ask
