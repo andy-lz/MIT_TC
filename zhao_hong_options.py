@@ -214,25 +214,30 @@ def execute_trade(VOL_CURVE, VOL_SPLINE, curr_pos, OPTION_DICT):
         perc_diff = (VOL_CURVE[strike] - VOL_SPLINE[strike])/VOL_CURVE[strike]
         if perc_diff > TRADING_THRESHOLD:
             security = "T" + str(strike) + "C"
-            qty = 50.0 * perc_diff
-            # sell qty
+            qty = 100.0 * perc_diff
             target_pos[security] = - qty
+            '''
             security = "T" + str(strike) + "P"
             qty = 50.0 * perc_diff
             # sell qty
             target_pos[security] = - qty
+            '''
         elif perc_diff < - TRADING_THRESHOLD:
             security = "T" + str(strike) + "C"
-            qty = 50.0 * perc_diff
+            qty = 100.0 * perc_diff
             target_pos[security] = qty
+            '''
             security = "T" + str(strike) + "P"
             qty = 50.0 * perc_diff
             target_pos[security] = qty
+            '''
         else:
             security = "T" + str(strike) + "C"
             target_pos[security] = 0
+            '''
             security = "T" + str(strike) + "P"
             target_pos[security] = 0
+            '''
 
     adj_target_pos = check_target_trade(curr_pos, target_pos, OPTION_DICT)
     submit_orders = {k: round(adj_target_pos.get(k, 0) - curr_pos.get(k, 0)) for k in set(adj_target_pos) | set(curr_pos)}
@@ -293,7 +298,7 @@ def trader_update_method(msg, order):
                 order.addBuy(security, quantity=quant, price=SECURITIES[security])
             elif quant < 0:
                 order.addSell(security, quantity=abs(quant), price=SECURITIES[security])
-    elif (len(open_orders.items()) + len(orders.keys())) >= 85 and len(order.keys()) <= 80:
+    elif (len(open_orders.items()) + len(orders.keys())) >= 85 and len(orders.keys()) <= 80:
         for security in orders.keys():
             quant = int(orders[security])
             if quant > 0:
