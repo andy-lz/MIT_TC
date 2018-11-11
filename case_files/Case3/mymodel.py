@@ -1,6 +1,11 @@
 from dayof.framework.train_loaders import load_simple, load_medium, load_hard
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+import numpy as np
+
 
 train_dir = 'train_data'
+
 
 # Implement your models below
 # Test mean square error on the training set by
@@ -14,11 +19,30 @@ class SimpleModel(object):
         self.train()
 
     def train(self):
-        # train model here
-        pass
+        X_train = np.array(zip(self.prev_price, self.x1, self.x2))
+        Y_train = self.next_price
+
+        # create a Linear Regressor
+        lin_regressor = LinearRegression()
+
+        # pass the order of your polynomial here
+        poly = PolynomialFeatures(3)
+
+        # convert to be used further to linear regression
+        X_transform = poly.fit_transform(X_train)
+
+        # fit this to Linear Regressor
+        reg = lin_regressor.fit(X_transform, Y_train)
+
+        return reg
 
     def predict(self, prev_price, x1, x2):
-        return prev_price
+        poly = PolynomialFeatures(3)
+        reg = self.train()
+        input_transform = poly.fit_transform(np.array([[prev_price, x1, x2]]))
+        next_price = reg.predict(input_transform)[0]
+        return next_price
+        #return prev_price
 
 class MediumModel(object):
     def __init__(self):
@@ -26,11 +50,18 @@ class MediumModel(object):
         self.train()
 
     def train(self):
-        # train model here
-        pass
+        X_train = np.array(zip(self.prev_price, self.x1, self.x2, self.x3))
+        Y_train = np.array(np.log(self.next_price)-np.log(self.prev_price))
+        lin_regressor = Linear Regression()
+        reg = lin_regressor.fit(X_train, Y_train)
+        return reg
 
     def predict(self, prev_price, x1, x2, x3):
-        return prev_price
+        input = np.array([[prev_price, x1, x2, x3]])
+        reg = self.train()
+        log_diff_pred = reg.predict(input)
+        next_price = np.exp(log_diff_pred + np.log(prev_price))
+        return next_price
 
 class HardModel(object):
     def __init__(self):
@@ -86,4 +117,4 @@ def allocate(simple_args, medium_args, hard_args):
     hard_prediction = hard_model.predict(*hard_args)
 
     # Sample: allocate all money (except a small threshold) to medium
-    return (0, (100000000 - 1) / medium_price, 0)
+    return ((100000000 - 1) / medium_price, 0, 0)
