@@ -118,18 +118,21 @@ def update_trader(msg, TradersOrder):
     open_orders = trader_state['open_orders']
     unfulfilled_sz = final_sz - net_pos
     if case_length - time < 8 and net_pos != 0:
-        if net_pos < 0:
-            amt = min(abs(net_pos), max_order_size, asks_sz.sum())
-            buy_up(amt, TradersOrder)
-        else:
-            amt = min(abs(net_pos), max_order_size, bids_sz.sum())
-            sell_off(amt, TradersOrder)
+        clear_pos(TradersOrder, net_pos)
     elif unfulfilled_sz != 0 and (9 > time - last_news_time > 2 or 15 > time - last_news_time > 10):
         process_lit(TradersOrder)
     # clear out positions near end of case
 
     # log_out('T')
 
+def clear_pos(TradersOrder, net_pos):
+    global P0_est, securities, max_order_size, asks_sz, bids_sz
+    if net_pos < 0:
+        amt = min(abs(net_pos), max_order_size, asks_sz.sum())
+        TradersOrder.addBuy(securities[0], amt, 0.75 * P0_est)
+    else:
+        amt = min(abs(net_pos), max_order_size, bids_sz.sum())
+        TradersOrder.addSell(securities[0], amt, 1.25 * P0_est)
 
 
 def update_trade(msg, TradersOrder):
@@ -248,19 +251,35 @@ def process_lit(order):
     elif unfulfilled_sz < 0:
         sell_off(min(-1 * unfulfilled_sz, max_order_size), order)
 
-
-
 def buy_up(sz, order):
+    global unfulfilled_sz, position_lit, securities, start_price, best_ask, C, news_px, news_sz
+    filled_sz = int(min(sz, asks_sz.sum() - 500))
+    unfulfilled_sz -= filled_sz
+    position_lit += filled_sz
+    if case_length - time > 8:
+        order.addBuy(securities[0], filled_sz, news_px + C*news_sz)
+        order.addSell(securities[0], filled_sz, 2 * start_price)
+
+def sell_off(sz, order):
+    global unfulfilled_sz, position_lit, securities, start_price, best_bid, C, news_px, news_sz
+    filled_sz = int(min(abs(sz), bids_sz.sum()-500))
+    unfulfilled_sz += filled_sz
+    position_lit -= filled_sz
+    if case_length - time > 8:
+        order.addSell(securities[0], filled_sz, news_px - C*news_sz)
+        order.addBuy(securities[0], filled_sz, 0.25 * start_price)
+
+def buy_up_temp(sz, order):
     global unfulfilled_sz, position_lit, securities, start_price, best_ask
     if best_ask[0] < news_px + C*news_sz:
         filled_sz = int(min(sz, asks_sz.sum()-500))
         unfulfilled_sz -= filled_sz
         position_lit += filled_sz
         order.addBuy(securities[0], filled_sz)
-        # order.addSell(securities[0], filled_sz, 1.5 * start_price)
+        # order.addSell(securities[0], filled_sz, 2 * start_price)
 
 
-def sell_off(sz, order):
+def sell_off_temp(sz, order):
     global unfulfilled_sz, position_lit, securities, start_price, best_bid
     if best_bid[0] > news_px - C*news_sz:
         filled_sz = int(min(abs(sz), bids_sz.sum()-500))
