@@ -62,7 +62,7 @@ def register(msg, TradersOrder):
     global case_length, position_limit, time, cash, position_lit, position_dark
     global P0_est, last_price_lit, last_price_dark, start_price
     case_length = msg['case_meta']['case_length']
-    position_limit = msg['case_meta']['underlyings']['TRDRS']['limit']
+    position_limit = msg['case_meta']['underlyings']['TRDRS.LIT']['limit']
     time = msg['elapsed_time']
     cash = msg['trader_state']['cash']['USD']
     position_lit = msg['trader_state']['positions']['TRDRS.LIT']
@@ -126,13 +126,14 @@ def update_trader(msg, TradersOrder):
     # log_out('T')
 
 def clear_pos(TradersOrder, net_pos):
+    cancel_all_orders(TradersOrder)
     global P0_est, securities, max_order_size, asks_sz, bids_sz
     if net_pos < 0:
         amt = min(abs(net_pos), max_order_size, asks_sz.sum())
-        TradersOrder.addBuy(securities[0], amt, 0.75 * P0_est)
+        TradersOrder.addBuy(securities[0], amt, 1.25 * P0_est)
     else:
         amt = min(abs(net_pos), max_order_size, bids_sz.sum())
-        TradersOrder.addSell(securities[0], amt, 1.25 * P0_est)
+        TradersOrder.addSell(securities[0], amt, 0.75 * P0_est)
 
 
 def update_trade(msg, TradersOrder):
