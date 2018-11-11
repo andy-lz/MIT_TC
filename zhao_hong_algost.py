@@ -261,6 +261,7 @@ def buy_up(sz, order):
     if case_length - time > 8:
         order.addBuy(securities[0], filled_sz, news_px + C*news_sz)
         order.addSell(securities[0], filled_sz, 2.5 * start_price)
+        order.addSell(securities[0], int(filled_sz/2), 2 * start_price)
 
 def sell_off(sz, order):
     global unfulfilled_sz, position_lit, securities, start_price, best_bid, C, news_px, news_sz
@@ -270,6 +271,7 @@ def sell_off(sz, order):
     if case_length - time > 8:
         order.addSell(securities[0], filled_sz, news_px - C*news_sz)
         order.addBuy(securities[0], filled_sz, 0.1 * start_price)
+        order.addBuy(securities[0], int(filled_sz/2), 0.5 * start_price)
 
 def buy_up_temp(sz, order):
     global unfulfilled_sz, position_lit, securities, start_price, best_ask
