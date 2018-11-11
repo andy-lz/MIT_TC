@@ -201,8 +201,10 @@ def check_target_trade(curr_pos, target_pos, OPTION_DICT):
     if abs(total_vega) > 2800:
         #puke if breaching vega limit
         target_pos = {k: 0 for k in curr_pos.keys()}
-    if abs(total_delta) > 400:
+    if abs(total_delta) > 600:
         target_pos[UNDERLYING_TICKER] = hedge_delta(target_greeks)
+    else:
+        target_pos[UNDERLYING_TICKER] = 0
     return target_pos
 
 
