@@ -213,20 +213,20 @@ def process_dark(order):
             return
     if time * 2 < case_length:
         if news_sz <= 0:
-            weight_avg = (news_px - fee + C*news_sz - P0_conf / 2) * (1- (2*time/case_length)) + \
-                         (news_P0 - fee - P0_conf/2)*(2*time/case_length)
-            order.addBuy(securities[1], int(max(1000, position_limit*0.7 - net_pos)), weight_avg)
+            #weight_avg = (news_px - fee + C*news_sz - P0_conf ) * (1- (2*time/case_length)) + \
+            #             (news_P0 - fee - P0_conf)*(2*time/case_length)
+            order.addBuy(securities[1], int(max(1000, position_limit*0.7 - net_pos)), news_P0 - fee - (P0_conf*2))
         else:
-            weight_avg = (news_px + fee + C*news_sz + P0_conf / 2) * (1- (2*time/case_length)) + \
-                        (news_P0 + fee + P0_conf/2)*(2*time/case_length)
-            order.addSell(securities[1], int(max(1000, position_limit*0.7 + net_pos)), weight_avg)
+            #weight_avg = (news_px + fee + C*news_sz + P0_conf) * (1- (2*time/case_length)) + \
+            #            (news_P0 + fee + P0_conf)*(2*time/case_length)
+            order.addSell(securities[1], int(max(1000, position_limit*0.7 + net_pos)), news_P0 + fee + (P0_conf*2))
     else:
         if case_length - time >20: 
             if news_sz <= 0:
-                order.addBuy(securities[1], int(max(1000, position_limit*0.7 - net_pos)), news_P0 - fee - P0_conf/2)
+                order.addBuy(securities[1], int(max(1000, position_limit*0.7 - net_pos)), news_P0 - fee - P0_conf)
             # order.addSell(securities[1], 1000, news_P0*1000)
             else:
-                order.addSell(securities[1], int(max(1000, position_limit*0.7 + net_pos)), news_P0 + fee + P0_conf/2)
+                order.addSell(securities[1], int(max(1000, position_limit*0.7 + net_pos)), news_P0 + fee + P0_conf)
             # order.addBuy(securities[1], 1000, 0)
 
 
