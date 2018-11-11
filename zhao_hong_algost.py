@@ -104,6 +104,9 @@ def update_market(msg, TradersOrder):
             P0_est = get_wap(bids_px, bids_sz, asks_px, asks_sz)
     else:
         last_price_dark = market_state['last_price']
+    cancel_all_orders(TradersOrder)
+    process_lit(TradersOrder)
+
 
 
 def update_trader(msg, TradersOrder):
