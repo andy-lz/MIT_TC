@@ -215,11 +215,11 @@ def process_dark(order):
         if news_sz <= 0:
             #weight_avg = (news_px - fee + C*news_sz - P0_conf ) * (1- (2*time/case_length)) + \
             #             (news_P0 - fee - P0_conf)*(2*time/case_length)
-            order.addBuy(securities[1], int(max(1000, position_limit*0.7 - net_pos)), news_P0 - fee - (P0_conf*2))
+            order.addBuy(securities[1], int(max(1000, position_limit*0.7 - net_pos)), news_P0 - fee - (P0_conf*3))
         else:
             #weight_avg = (news_px + fee + C*news_sz + P0_conf) * (1- (2*time/case_length)) + \
             #            (news_P0 + fee + P0_conf)*(2*time/case_length)
-            order.addSell(securities[1], int(max(1000, position_limit*0.7 + net_pos)), news_P0 + fee + (P0_conf*2))
+            order.addSell(securities[1], int(max(1000, position_limit*0.7 + net_pos)), news_P0 + fee + (P0_conf*3))
     else:
         if case_length - time >20: 
             if news_sz <= 0:
@@ -262,6 +262,8 @@ def buy_up(sz, order):
         order.addBuy(securities[0], filled_sz, news_px + C*news_sz)
         order.addSell(securities[0], filled_sz, 2.5 * start_price)
         order.addSell(securities[0], int(filled_sz/2), 2 * start_price)
+        order.addSell(securities[0], int(filled_sz/3), 1.5 * start_price)
+        order.addSell(securities[0], int(filled_sz/4), 1.25 * start_price)
 
 def sell_off(sz, order):
     global unfulfilled_sz, position_lit, securities, start_price, best_bid, C, news_px, news_sz
@@ -272,6 +274,7 @@ def sell_off(sz, order):
         order.addSell(securities[0], filled_sz, news_px - C*news_sz)
         order.addBuy(securities[0], filled_sz, 0.1 * start_price)
         order.addBuy(securities[0], int(filled_sz/2), 0.5 * start_price)
+        order.addBuy(securities[0], int(filled_sz/3), 0.75 * start_price)
 
 def buy_up_temp(sz, order):
     global unfulfilled_sz, position_lit, securities, start_price, best_ask
