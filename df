@@ -1,0 +1,49 @@
+[33mcommit f81dbf35be997f10afe18926fef3f05d93ea561c[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m
+Author: evaniahong <evaniahong@users.noreply.github.com>
+Date:   Fri Nov 2 20:36:07 2018 -0500
+
+    add implied vol calc and vol curve
+
+[33mcommit e383d3f76e4466c78b5ee376bf0367ff695eac32[m
+Author: evaniahong <evaniahong@users.noreply.github.com>
+Date:   Fri Nov 2 20:21:23 2018 -0500
+
+    add implied vol calc
+
+[33mcommit 9c4449fb32f45dd33bc8a0b78f1aa271f82f08f1[m
+Author: evaniahong <evaniahong@users.noreply.github.com>
+Date:   Thu Nov 1 22:07:11 2018 -0500
+
+    adding options trade logic
+
+[33mcommit 7d5568ffa991aaa60c907b2982d1fe09747413da[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: andy <andyzhao56@gmail.com>
+Date:   Thu Nov 1 22:02:16 2018 -0500
+
+    Added more samples -- algo SnT and example bot
+
+[33mcommit e2594be06c83efcbbe68d70a12dd4b22ade66632[m
+Author: andy <andyzhao56@gmail.com>
+Date:   Thu Nov 1 21:57:18 2018 -0500
+
+    Added sample files
+
+[33mcommit 273949d81a1af30d808ac3bd95b37599fb5d81da[m
+Author: andy <andyzhao56@gmail.com>
+Date:   Thu Nov 1 21:51:44 2018 -0500
+
+    Added sample tradersbot
+
+[33mcommit 876bb269adabc597fd8ed9ed762579f904c9118c[m
+Author: Andy Zhao <andyzhao56@gmail.com>
+Date:   Mon Oct 29 18:34:50 2018 -0500
+
+    Updated README
+    
+    Documented Piazza + Mangocore setup
+
+[33mcommit f9f74e265f18ddaad3499596fd78e250df7dcc7d[m
+Author: Andy Zhao <andyzhao56@gmail.com>
+Date:   Mon Oct 29 18:05:10 2018 -0500
+
+    Initial commit
