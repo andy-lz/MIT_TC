@@ -261,10 +261,10 @@ def buy_up(sz, order):
     if case_length - time > 8:
         order.addBuy(securities[0], filled_sz, news_px + C*news_sz)
         order.addSell(securities[0], int(filled_sz), 1.03 * P0_est)
+        order.addSell(securities[0], int(filled_sz), 1.04 * P0_est)
+        order.addSell(securities[0], int(filled_sz), 1.05 * P0_est)
+        order.addSell(securities[0], int(filled_sz), 1.06 * P0_est)
         order.addSell(securities[0], int(filled_sz), 1.1 * P0_est)
-        order.addSell(securities[0], int(filled_sz), 1.25 * P0_est)
-        order.addSell(securities[0], int(filled_sz), 1.5 * P0_est)
-        order.addSell(securities[0], int(filled_sz), 2 * P0_est)
         order.addSell(securities[0], filled_sz, 2.5 * P0_est)
 
 def sell_off(sz, order):
@@ -275,12 +275,12 @@ def sell_off(sz, order):
     if case_length - time > 8:
         order.addSell(securities[0], filled_sz, news_px - C*news_sz)
         order.addBuy(securities[0], int(filled_sz), 0.97 * P0_est)
+        order.addBuy(securities[0], int(filled_sz), 0.96 * P0_est)
         order.addBuy(securities[0], int(filled_sz), 0.95 * P0_est)
+        order.addBuy(securities[0], int(filled_sz), 0.94 * P0_est)
+        order.addBuy(securities[0], int(filled_sz), 0.93 * P0_est)
         order.addBuy(securities[0], int(filled_sz), 0.9 * P0_est)
-        order.addBuy(securities[0], int(filled_sz), 0.8 * P0_est)
-        order.addBuy(securities[0], int(filled_sz), 0.75 * P0_est)
-        order.addBuy(securities[0], int(filled_sz), 0.5 * P0_est)
-        order.addBuy(securities[0], filled_sz, 0.1 * P0_est)
+        order.addBuy(securities[0], filled_sz, 0.8 * P0_est)
 
 def buy_up_temp(sz, order):
     global unfulfilled_sz, position_lit, securities, start_price, best_ask
