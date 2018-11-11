@@ -258,19 +258,33 @@ def get_order(curr_pos):
     orders = execute_trade(CURR_VOL_CURVE, SMOOTHED_VOL_CURVE, curr_pos, OPTION_DICT)
     return orders
 
+def cancel_all_orders(order, open_orders):
+    if open_orders is not None:
+        for k, v in open_orders.items():
+            order.addCancel(v['ticker'], int(k))
 
 def trader_update_method(msg, order):
     global SECURITIES
     positions = msg['trader_state']['positions']
+    open_orders = msg['trader_state']['open_orders']
     orders = get_order(positions)
 
-    for security in orders.keys():
-        quant = orders[security]
-        quant = 1
-        if quant > 0:
-            order.addBuy(security, quantity=quant, price=SECURITIES[security])
-        elif quant < 0:
-            order.addSell(security, quantity=abs(quant), price=SECURITIES[security])
+    #checking message limits
+    if (len(open_orders.items()) + len(orders.keys())) < 85:
+        cancel_all_orders(order, open_orders)
+        for security in orders.keys():
+            quant = int(orders[security])
+            if quant > 0:
+                order.addBuy(security, quantity=quant, price=SECURITIES[security])
+            elif quant < 0:
+                order.addSell(security, quantity=abs(quant), price=SECURITIES[security])
+    elif (len(open_orders.items()) + len(orders.keys())) >= 85 and len(order.keys()) <= 80:
+        for security in orders.keys():
+            quant = int(orders[security])
+            if quant > 0:
+                order.addBuy(security, quantity=quant, price=SECURITIES[security])
+            elif quant < 0:
+                order.addSell(security, quantity=abs(quant), price=SECURITIES[security])
 
 t.onAckRegister = ack_register_method
 t.onMarketUpdate = market_update_method
