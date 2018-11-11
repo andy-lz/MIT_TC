@@ -216,28 +216,28 @@ def execute_trade(VOL_CURVE, VOL_SPLINE, curr_pos, OPTION_DICT):
             security = "T" + str(strike) + "C"
             qty = 100.0 * perc_diff
             target_pos[security] = - qty
-            '''
+
             security = "T" + str(strike) + "P"
             qty = 50.0 * perc_diff
             # sell qty
             target_pos[security] = - qty
-            '''
+
         elif perc_diff < - TRADING_THRESHOLD:
             security = "T" + str(strike) + "C"
             qty = 100.0 * perc_diff
             target_pos[security] = qty
-            '''
+
             security = "T" + str(strike) + "P"
             qty = 50.0 * perc_diff
             target_pos[security] = qty
-            '''
+
         else:
             security = "T" + str(strike) + "C"
             target_pos[security] = 0
-            '''
+
             security = "T" + str(strike) + "P"
             target_pos[security] = 0
-            '''
+
 
     adj_target_pos = check_target_trade(curr_pos, target_pos, OPTION_DICT)
     submit_orders = {k: round(adj_target_pos.get(k, 0) - curr_pos.get(k, 0)) for k in set(adj_target_pos) | set(curr_pos)}
