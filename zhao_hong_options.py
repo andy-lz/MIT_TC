@@ -269,8 +269,10 @@ def trader_update_method(msg, order):
     global SECURITIES
     print(TIME)
     positions = msg['trader_state']['positions']
+    print("positions:", positions)
     open_orders = msg['trader_state']['open_orders']
     orders = get_order(positions)
+    print("orders", orders)
 
     #checking message limits
     if (len(open_orders.items()) + len(orders.keys())) < 85:
