@@ -217,7 +217,7 @@ def execute_trade(VOL_CURVE, VOL_SPLINE, curr_pos, OPTION_DICT):
         perc_diff = (VOL_CURVE[strike] - VOL_SPLINE[strike])/VOL_CURVE[strike]
         if perc_diff > TRADING_THRESHOLD:
             security = "T" + str(strike) + "C"
-            qty = 400.0 * perc_diff
+            qty = 800.0 * perc_diff
             target_pos[security] = - qty
             '''
             security = "T" + str(strike) + "P"
@@ -227,7 +227,7 @@ def execute_trade(VOL_CURVE, VOL_SPLINE, curr_pos, OPTION_DICT):
             '''
         elif perc_diff < - TRADING_THRESHOLD:
             security = "T" + str(strike) + "C"
-            qty = 400.0 * perc_diff
+            qty = 800.0 * perc_diff
             target_pos[security] = qty
             '''
             security = "T" + str(strike) + "P"
