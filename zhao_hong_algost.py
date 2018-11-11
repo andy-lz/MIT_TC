@@ -62,7 +62,7 @@ def register(msg, TradersOrder):
     global case_length, position_limit, time, cash, position_lit, position_dark
     global P0_est, last_price_lit, last_price_dark, start_price
     case_length = msg['case_meta']['case_length']
-    position_limit = msg['case_meta']['underlyings']['TRDRS.LIT']['limit']
+    position_limit = msg['case_meta']['underlyings']['TRDRS']['limit']
     time = msg['elapsed_time']
     cash = msg['trader_state']['cash']['USD']
     position_lit = msg['trader_state']['positions']['TRDRS.LIT']
@@ -221,11 +221,12 @@ def process_dark(order):
                         (news_P0 + fee + P0_conf)*(2*time/case_length)
             order.addSell(securities[1], int(max(1000, position_limit*0.7 + net_pos)), weight_avg)
     else:
-        if news_sz <= 0:
-            order.addBuy(securities[1], int(max(1000, position_limit*0.7 - net_pos)), news_P0 - fee - P0_conf)
+        if case_length - time >20: 
+            if news_sz <= 0:
+                order.addBuy(securities[1], int(max(1000, position_limit*0.7 - net_pos)), news_P0 - fee - P0_conf)
             # order.addSell(securities[1], 1000, news_P0*1000)
-        else:
-            order.addSell(securities[1], int(max(1000, position_limit*0.7 + net_pos)), news_P0 + fee + P0_conf)
+            else:
+                order.addSell(securities[1], int(max(1000, position_limit*0.7 + net_pos)), news_P0 + fee + P0_conf)
             # order.addBuy(securities[1], 1000, 0)
 
 
