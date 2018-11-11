@@ -267,7 +267,7 @@ def cancel_all_orders(order, open_orders):
 
 def trader_update_method(msg, order):
     global SECURITIES
-    print(T)
+    print(TIME)
     positions = msg['trader_state']['positions']
     open_orders = msg['trader_state']['open_orders']
     orders = get_order(positions)
