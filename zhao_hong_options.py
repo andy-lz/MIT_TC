@@ -5,6 +5,7 @@ from scipy.optimize import brentq
 import re
 import tradersbot as tt
 import sys
+import datetime
 
 t = tt.TradersBot(host=sys.argv[1], id=sys.argv[2], password=sys.argv[3])
 
@@ -14,6 +15,8 @@ HIST_VOL_CURVE = {}
 TIME = 0
 UNDERLYING_TICKER = 'TMXFUT'
 TRADING_THRESHOLD = 0.05
+LAST_ORDER_TIME = datetime.datetime.now()
+ONE_SECOND = datetime.timedelta(seconds=1)
 
 # Supporting Black Scholes
 def d1(S, K, t, r, sigma):  # see Hull, page 292
@@ -282,6 +285,8 @@ def cancel_all_orders(order, open_orders):
 
 def trader_update_method(msg, order):
     global SECURITIES
+    global LAST_ORDER_TIME
+    global ONE_SECOND
     print(TIME)
     positions = msg['trader_state']['positions']
     print("positions:", positions)
@@ -289,22 +294,26 @@ def trader_update_method(msg, order):
     orders = get_order(positions)
     print("orders", orders)
 
-    #checking message limits
-    if (len(open_orders.items()) + len(orders.keys())) < 85:
-        cancel_all_orders(order, open_orders)
-        for security in orders.keys():
-            quant = int(orders[security])
-            if quant > 0:
-                order.addBuy(security, quantity=quant, price=SECURITIES[security])
-            elif quant < 0:
-                order.addSell(security, quantity=abs(quant), price=SECURITIES[security])
-    elif (len(open_orders.items()) + len(orders.keys())) >= 85 and len(orders.keys()) <= 80:
-        for security in orders.keys():
-            quant = int(orders[security])
-            if quant > 0:
-                order.addBuy(security, quantity=quant, price=SECURITIES[security])
-            elif quant < 0:
-                order.addSell(security, quantity=abs(quant), price=SECURITIES[security])
+    rightnow = datetime.datetime.now()
+
+    if rightnow-LAST_ORDER_TIME >= datetime.timedelta(seconds=1):
+        #checking message limits
+        if (len(open_orders.items()) + len(orders.keys())) < 85:
+            cancel_all_orders(order, open_orders)
+            for security in orders.keys():
+                quant = int(orders[security])
+                if quant > 0:
+                    order.addBuy(security, quantity=quant, price=SECURITIES[security])
+                elif quant < 0:
+                    order.addSell(security, quantity=abs(quant), price=SECURITIES[security])
+        elif (len(open_orders.items()) + len(orders.keys())) >= 85 and len(orders.keys()) <= 80:
+            for security in orders.keys():
+                quant = int(orders[security])
+                if quant > 0:
+                    order.addBuy(security, quantity=quant, price=SECURITIES[security])
+                elif quant < 0:
+                    order.addSell(security, quantity=abs(quant), price=SECURITIES[security])
+        LAST_ORDER_TIME = datetime.datetime.now()
 
 t.onAckRegister = ack_register_method
 t.onMarketUpdate = market_update_method
