@@ -1,5 +1,7 @@
 # MIT_TC
 
+## Dark Pool Algo S&T Case
+
 Clarification of Cases (summary of Piazza posts):
 - Will there be click trading?
     Answer: No. 
